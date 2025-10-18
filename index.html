@@ -37,15 +37,30 @@ body{
   font-size: 36px;
   font-weight: 800;
   color: #ff6b81;
-  text-shadow: 0 0 15px rgba(255,107,129,0.5);
+  text-shadow: 0 0 20px rgba(255,107,129,0.5);
   opacity: 0;
   pointer-events: none;
   z-index: 9999;
-  transition: opacity 1s ease, transform 1s ease;
+  animation: none;
 }
-#loveMessage.show {
-  opacity: 1;
-  transform: translate(-50%, -50%) scale(1);
+
+/* Fade-in e zoom inicial */
+@keyframes fadeZoom {
+  0% {opacity: 0; transform: translate(-50%, -50%) scale(0.6);}
+  50% {opacity: 1; transform: translate(-50%, -50%) scale(1.05);}
+  100% {opacity: 1; transform: translate(-50%, -50%) scale(1);}
+}
+
+/* Pulsação suave com glow */
+@keyframes pulse {
+  0%,100% { transform: translate(-50%, -50%) scale(1); text-shadow:0 0 15px rgba(255,107,129,0.5);}
+  50% { transform: translate(-50%, -50%) scale(1.08); text-shadow:0 0 30px rgba(255,107,129,0.9);}
+}
+
+/* Float/fade-out */
+@keyframes floatUp {
+  0% {opacity: 1; transform: translate(-50%, -50%) scale(1); text-shadow:0 0 30px rgba(255,107,129,0.9);}
+  100% {opacity: 0; transform: translate(-50%, -70%) scale(1.1); text-shadow:0 0 50px rgba(255,107,129,0);}
 }
 
 /* ========================== Carrossel ========================== */
@@ -201,7 +216,7 @@ footer{
   .media img{
     width:100%;
     height:100%;
-    object-fit:cover; /* cobre todo o quadrado */
+    object-fit:cover;
   }
   .content{
     flex:1;
@@ -235,13 +250,12 @@ footer{
 </head>
 <body>
 
-<!-- ========================== Mensagem de amor ========================== -->
 <div id="loveMessage">Eu te amo, preta ❤️</div>
 
 <div class="wrap">
   <div style="text-align:center; margin-bottom:12px;">
     <audio controls autoplay loop>
-      <source src="mudatudo.mp3" type="audio/mpeg">
+      <source src="chuva.mp3" type="audio/mpeg">
       Seu navegador não suporta o elemento de áudio.
     </audio>
   </div>
@@ -272,7 +286,10 @@ footer{
   </div>
 </div>
 
+
+
 <script>
+// ========================== Dados ==========================
 const imagens = [
   "./1.jpg","./2.jpg","./o primeiro cineminha juntoos.jpg","./jantarzinho.jpg",
   "./heroi.jpg","./bebemos-jintos.jpg","./insanos.jpg","./4.jpg",
@@ -297,51 +314,30 @@ const captions = [
 ];
 const colors = ["#1f2a3b","#273447","#2f3e52","#37485d","#3f5168","#475b73","#4f647e","#576f89","#60879c","#6890a7","#70a0b2","#78a9bd","#80b2c8"];
 
+// ========================== Carrossel ==========================
 const slidesEl = document.getElementById('slides');
 const indicatorsEl = document.getElementById('indicators');
 let current=0;
 
 function makeSlide(idx){
-  const s = document.createElement('div');
-  s.className='slide';
-  s.style.background=colors[idx%colors.length];
-  
-  const media=document.createElement('div');
-  media.className='media';
-  media.innerHTML=`<img src="${imagens[idx]}" alt="Memória ${idx+1}">`;
-  
-  const content=document.createElement('div');
-  content.className='content';
-  content.innerHTML=`<div class="month">${captions[idx].title}</div><div class="desc">${captions[idx].text}</div>`;
-  
-  s.appendChild(media);
-  s.appendChild(content);
-  slidesEl.appendChild(s);
-
-  const dot=document.createElement('div');
-  dot.className='dot';
-  dot.addEventListener('click',()=>goTo(idx));
-  indicatorsEl.appendChild(dot);
+  const s=document.createElement('div'); s.className='slide'; s.style.background=colors[idx%colors.length];
+  const media=document.createElement('div'); media.className='media'; media.innerHTML=`<img src="${imagens[idx]}" alt="Memória ${idx+1}">`;
+  const content=document.createElement('div'); content.className='content'; content.innerHTML=`<div class="month">${captions[idx].title}</div><div class="desc">${captions[idx].text}</div>`;
+  s.appendChild(media); s.appendChild(content); slidesEl.appendChild(s);
+  const dot=document.createElement('div'); dot.className='dot'; dot.addEventListener('click',()=>goTo(idx)); indicatorsEl.appendChild(dot);
 }
-
 for(let i=0;i<imagens.length;i++) makeSlide(i);
 
-function update(){
-  slidesEl.style.transform=`translateX(${-current*100}%)`;
-  document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===current));
-}
-
+function update(){ slidesEl.style.transform=`translateX(${-current*100}%)`; document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===current));}
 function prev(){current=(current-1+imagens.length)%imagens.length; update();}
 function next(){current=(current+1)%imagens.length; update();}
 function goTo(i){current=i; update();}
-
 document.getElementById('prev').addEventListener('click',()=>{prev(); resetAutoplay();});
 document.getElementById('next').addEventListener('click',()=>{next(); resetAutoplay();});
 
 let autoplay=true, intervalId=null, delay=4000;
 const timerEl=document.getElementById('timer');
 const togglePlayBtn=document.getElementById('togglePlay');
-
 function startAutoplay(){clearInterval(intervalId);intervalId=setInterval(next,delay);timerEl.textContent=`Autoplay: ligado — alterna a cada ${delay/1000}s`;togglePlayBtn.textContent='Pausar';autoplay=true;}
 function stopAutoplay(){clearInterval(intervalId);intervalId=null;timerEl.textContent='Autoplay: pausado';togglePlayBtn.textContent='Reproduzir';autoplay=false;}
 function resetAutoplay(){if(autoplay){stopAutoplay();startAutoplay();}}
@@ -351,20 +347,19 @@ togglePlayBtn.addEventListener('click',()=>autoplay?stopAutoplay():startAutoplay
 let startX=0, deltaX=0, isTouch=false;
 slidesEl.addEventListener('pointerdown',e=>{isTouch=true;startX=e.clientX;slidesEl.style.transition='none';});
 window.addEventListener('pointermove',e=>{if(!isTouch) return; deltaX=e.clientX-startX; slidesEl.style.transform=`translateX(${-current*100 + (deltaX/slidesEl.clientWidth)*100}%)`;});
-window.addEventListener('pointerup',()=>{if(!isTouch)return; isTouch=false; slidesEl.style.transition=''; if(Math.abs(deltaX)>60){deltaX<0?next():prev();}else update(); deltaX=0; resetAutoplay();});
+window.addEventListener('pointerup',()=>{if(!isTouch)return; isTouch=false; slidesEl.style.transition=''; if(Math.abs(deltaX)>60){deltaX<0?next():prev();} else update(); deltaX=0; resetAutoplay();});
+window.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')prev(); if(e.key==='ArrowRight')next();});
 
-// Teclas
-window.addEventListener('keydown',e=>{if(e.key==='ArrowLeft') prev(); if(e.key==='ArrowRight') next();});
+// Inicializa
+update(); startAutoplay();
 
-// ========================== Animação Eu te amo ==========================
+// ========================== Mensagem Eu te amo ==========================
 window.addEventListener('load', () => {
   const loveMsg = document.getElementById('loveMessage');
-  loveMsg.classList.add('show');
-  setTimeout(() => { loveMsg.style.opacity='0'; }, 3000);
+  loveMsg.style.animation = 'fadeZoom 1s forwards';
+  setTimeout(()=>{loveMsg.style.animation = 'pulse 2.5s ease-in-out infinite';},2000);
+  setTimeout(()=>{loveMsg.style.animation = 'floatUp 1s forwards';},3500);
 });
-
-update();
-startAutoplay();
 </script>
 </body>
 </html>
