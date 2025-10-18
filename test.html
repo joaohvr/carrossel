@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Carrossel — Nossas Memórias</title>
+  <style>
+    :root{
+      --bg:#0f1724;
+      --card:#0b1220;
+      --accent:#ff6b81;
+      --muted:#9aa4b2;
+      --glass: rgba(255,255,255,0.04);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      background:linear-gradient(135deg,#071026 0%, #0b1630 100%);
+      font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;
+      color:#e6eef6;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-direction:column;
+      padding:24px;
+    }
+    .wrap{width:100%;max-width:920px}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));border-radius:18px;padding:20px;box-shadow:0 8px 30px rgba(2,6,23,0.6);}
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+    .title{font-size:18px;font-weight:700;display:flex;gap:10px;align-items:center}
+    .subtitle{font-size:13px;color:var(--muted)}
+
+    /* Carousel */
+    .carousel{position:relative;overflow:hidden;border-radius:12px;background:var(--card);padding:16px}
+    .slides{display:flex;transition:transform 450ms cubic-bezier(.22,.9,.36,1);}
+    .slide{min-width:100%;flex-shrink:0;border-radius:10px;padding:26px;display:flex;align-items:center;gap:18px;backdrop-filter: blur(4px);}
+    .media{
+      width:44%;
+      min-height:220px;
+      max-height:300px;
+      border-radius:8px;
+      overflow:hidden;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .media img{
+      width:100%;
+      height:100%;
+      max-height:300px;
+      object-fit:cover;
+      border-radius:8px;
+    }
+    .content{width:56%}
+    .month{font-size:22px;font-weight:700;margin-bottom:6px;color:#fff}
+    .desc{color:var(--muted);line-height:1.4}
+
+    /* controls */
+    .controls{position:absolute;left:8px;right:8px;top:50%;transform:translateY(-50%);display:flex;justify-content:space-between;pointer-events:none}
+    button.ctrl{pointer-events:auto;background:var(--glass);border:0;padding:10px;border-radius:999px;backdrop-filter: blur(6px);cursor:pointer;color:#fff}
+    button.ctrl:active{transform:scale(.98)}
+
+    /* indicators */
+    .indicators{display:flex;gap:8px;justify-content:center;margin-top:14px}
+    .dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.12);cursor:pointer}
+    .dot.active{background:var(--accent);box-shadow:0 0 12px rgba(255,107,129,0.28)}
+
+    /* responsive */
+    @media(min-width:760px){
+      .slide{padding:32px}
+      .media{width:40%}
+      .content{width:60%}
+    }
+
+    /* footer */
+    footer{display:flex;justify-content:space-between;align-items:center;margin-top:12px}
+    .timer{color:var(--muted);font-size:13px}
+    .actions{display:flex;gap:8px}
+    .btn{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 12px;border-radius:10px;color:#e6eef6;cursor:pointer}
+    .btn.primary{background:var(--accent);border-color:transparent}
+
+    /* Mensagem romântica */
+    .mensagem-romantica{
+      margin-top:30px;
+      max-width:900px;
+      background:rgba(255,255,255,0.04);
+      border-radius:16px;
+      padding:24px;
+      box-shadow:0 8px 20px rgba(0,0,0,0.4);
+      line-height:1.6;
+      font-size:16px;
+      text-align:justify;
+      color:#f1f1f1;
+      border-left:4px solid var(--accent);
+      animation:fadeIn 1.6s ease-in-out;
+    }
+    .mensagem-romantica strong{color:var(--accent);}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(15px);}to{opacity:1;transform:translateY(0);}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <!-- Barra de áudio -->
+    <div style="text-align:center; margin-bottom:12px;">
+      <audio controls autoplay loop>
+        <source src="chuva.mp3" type="audio/mpeg">
+        Seu navegador não suporta o elemento de áudio.
+      </audio>
+    </div>
+
+    <!-- Carrossel -->
+    <div class="card">
+      <header>
+        <div>
+          <div class="title">🎉 Nosso Carrossel — Memórias</div>
+          <div class="subtitle">Passe os slides para relembrar momentos especiais</div>
+        </div>
+        <div class="subtitle">memórias ❤️</div>
+      </header>
+
+      <div class="carousel" id="carousel">
+        <div class="controls">
+          <button class="ctrl" id="prev" aria-label="Anterior">❮</button>
+          <button class="ctrl" id="next" aria-label="Próximo">❯</button>
+        </div>
+        <div class="slides" id="slides"></div>
+      </div>
+
+      <div class="indicators" id="indicators"></div>
+
+      <footer>
+        <div class="timer" id="timer">Autoplay: ligado — alterna a cada 4s</div>
+        <div class="actions">
+          <button class="btn" id="togglePlay">Pausar</button>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Mensagem Romântica -->
+  <!-- <div class="mensagem-romantica">
+    <p>Oii minha fofinha, espero que esteja melhor. Venho por meio desta tentar me redimir, pelo menos um pouco com essa situação que causei. Agora sei que errei e imploro por perdão.</p>
+
+    <p>Sempre quis alguém igual a você, e hoje tenho e sou muito feliz por isso. Realmente não faço ideia do que passou pela minha cabeça fazer isso. Você é <strong>a mulher dos meus sonhos</strong>, a mulher que eu mais desejo e quero em todo o mundo — em todos os universos. Você é minha calmaria, minha menina da música:</p>
+
+    <p style="text-align:center; font-style:italic; margin-top:8px;">"Eu amo você menina..." 🎶</p>
+
+    <p>E também da outra que diz:</p>
+
+    <p style="text-align:center; font-style:italic;">"O seu sorriso muda tudo, tudo, tudo e quando voce chega, muda o mundo, no seu abraço encontro a saida e do seu lado eu to de bem com a vida... quem sou eu sem você aqui" 💞</p>
+
+    <p>Sinto muito por ter desapontado. Prometo ser um novo homem e ser a pessoa que você se apaixonou!</p>
+
+    <p>Vai ser eu e voce sempre minha gatinha</p>
+
+    <p>Te amo demais, minha preta. Nunca mais vou errar ou te decepcionar, te prometo isso de coração. Se ainda quiser algo comigo, estou disposto a melhorar e mudar pra me tornar <strong>a melhor versão de mim</strong> e voltar a ser o homem pelo qual você se apaixonou. Pois você é e sempre vai ser <strong>a mulher da minha vida</strong> ❤️</p>
+
+    <p>3< Esse site é só um spoiler do que estou planejando pra gente <3</p>
+  </div> -->
+
+  <script>
+    const totalMemories = 14;
+    const slidesEl = document.getElementById('slides');
+    const indicatorsEl = document.getElementById('indicators');
+
+    const imagens = [
+      "./1.jpg","./2.jpg","./o primeiro cineminha juntoos.jpg","./jantarzinho.jpg","./heroi.jpg",
+      "./bebemos-jintos.jpg","./insanos.jpg","./4.jpg","./IMG-20250720-WA0023(2).jpg","./luanzinho.jpg",
+      "./natalzinhoo.jpg","./ano-novo.jpg","./ano-novopt2.jpg","./IMG-20250814-WA0498.jpg"
+    ];
+
+  
+
+    const captions = [
+      {title:"Primeira ida em casinha💖", text:"O dia em que você conheceu minha família!"},
+      {title:"Cabelo novo 🌸", text:"Quando cortei o cabelo pra te impressionar 😉"},
+      {title:"Primeiro cineminha 🌞", text:"Nosso primeiro cineminha juntos!"},
+      {title:"Jantar romântico 🌹", text:"Nosso primeiro jantar a dois."},
+      {title:"Seu herói 💕", text:"Eu quero ser seu heroi, sempre vou te proteger, quero ser seu capitao do amor."},
+      {title:"Chapamos o globo 🎶", text:"Aquele dia divertido que rimos muito juntos no aniversário da Mary."},
+      {title:"Lanchinhoooo 🥪", text:"Nosso primeiro insanos juntoos."},
+      {title:"Filme juntos 🍀", text:"Nosso primeiro filme juntinhos."},
+      {title:"Arrumados para o show", text:"Arrumadinhos pra ver nosso idoloo"},
+      {title:"Luanzinho", text:"O dia que vimos o Luan Santana no palco"},
+      {title:"Natalzinho 💖", text:"Continuando nossa linda história."},
+      {title:"Primeiro aninho novo", text:"Nosso aninho novo, que foi magnificooo, precisamos viajar juntos"},
+      {title:"Ano novo parte 2", text:"parte 2 desse dia maravilhoso, na piscininha juntinhos 💗😍💓💞"},
+      {title:"Casamento da Duda", text:"A gente feliz e se divertindo no casamento da Duda"}
+    ];
+
+    const colors = [
+      "#1f2a3b","#273447","#2f3e52","#37485d","#3f5168","#475b73","#4f647e",
+      "#576f89","#60879c","#6890a7","#70a0b2","#78a9bd","#80b2c8"
+    ];
+
+    function makeSlide(idx, caption){
+      const s = document.createElement('div');
+      s.className='slide';
+      s.style.background = colors[idx % colors.length]; // pega cores do array em loop
+      const media = document.createElement('div');
+      media.className='media';
+      media.innerHTML=`<img src="${imagens[idx]}" alt="Memória ${idx+1}">`;
+      const content = document.createElement('div');
+      content.className='content';
+      content.innerHTML=`<div class="month">${caption.title}</div><div class="desc">${caption.text}</div>`;
+      s.appendChild(media);
+      s.appendChild(content);
+      return s;
+    }
+
+
+    captions.forEach((c,i)=>{
+      slidesEl.appendChild(makeSlide(i,c));
+      const dot = document.createElement('div');
+      dot.className='dot';
+      dot.addEventListener('click',()=>goTo(i));
+      indicatorsEl.appendChild(dot);
+    });
+
+    let current=0;
+    const slidesCount=totalMemories;
+    const prevBtn=document.getElementById('prev');
+    const nextBtn=document.getElementById('next');
+    const togglePlayBtn=document.getElementById('togglePlay');
+    const timerEl=document.getElementById('timer');
+
+    function update(){
+      slidesEl.style.transform=`translateX(${-current*100}%)`;
+      document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===current));
+    }
+    function prev(){current=(current-1+slidesCount)%slidesCount;update();}
+    function next(){current=(current+1)%slidesCount;update();}
+    function goTo(i){current=i;update();}
+
+    prevBtn.addEventListener('click',()=>{prev();resetAutoplay();});
+    nextBtn.addEventListener('click',()=>{next();resetAutoplay();});
+
+    let autoplay=true;
+    let intervalId=null;
+    const delay=8000;
+    function startAutoplay(){clearInterval(intervalId);intervalId=setInterval(next,delay);timerEl.textContent=`Autoplay: ligado — alterna a cada ${delay/1000}s`;togglePlayBtn.textContent='Pausar';autoplay=true;}
+    function stopAutoplay(){clearInterval(intervalId);intervalId=null;timerEl.textContent='Autoplay: pausado';togglePlayBtn.textContent='Reproduzir';autoplay=false;}
+    function resetAutoplay(){if(autoplay){stopAutoplay();startAutoplay();}}
+    togglePlayBtn.addEventListener('click',()=>{autoplay?stopAutoplay():startAutoplay();});
+
+    let startX=0,deltaX=0,isTouching=false;
+    slidesEl.addEventListener('pointerdown',e=>{isTouching=true;startX=e.clientX;slidesEl.style.transition='none';});
+    window.addEventListener('pointermove',e=>{if(!isTouching)return;deltaX=e.clientX-startX;slidesEl.style.transform=`translateX(${-current*100+(deltaX/slidesEl.clientWidth)*100}%)`;});
+    window.addEventListener('pointerup',()=>{if(!isTouching)return;isTouching=false;slidesEl.style.transition='';if(Math.abs(deltaX)>60){if(deltaX<0)next();else prev();}else update();deltaX=0;resetAutoplay();});
+    window.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')prev();if(e.key==='ArrowRight')next();});
+    update();startAutoplay();
+  </script>
+</body>
+</html>
