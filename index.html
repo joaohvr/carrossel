@@ -335,7 +335,7 @@ function goTo(i){current=i; update();}
 document.getElementById('prev').addEventListener('click',()=>{prev(); resetAutoplay();});
 document.getElementById('next').addEventListener('click',()=>{next(); resetAutoplay();});
 
-let autoplay=true, intervalId=null, delay=4000;
+let autoplay=true, intervalId=null, delay=8000;
 const timerEl=document.getElementById('timer');
 const togglePlayBtn=document.getElementById('togglePlay');
 function startAutoplay(){clearInterval(intervalId);intervalId=setInterval(next,delay);timerEl.textContent=`Autoplay: ligado — alterna a cada ${delay/1000}s`;togglePlayBtn.textContent='Pausar';autoplay=true;}
